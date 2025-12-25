@@ -1,39 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-
+import { useEffect } from "react";
 import { SPECIAL_MESSAGE } from "@/lib/specialMessage";
-import { setScene } from "@/lib/themes";
 
 export default function XmasClient() {
-  const sp = useSearchParams();
-  const first = sp.get("first");
-
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-    try {
-      setScene("xmas" as any);
-    } catch {}
+    // segna che il Natale è stato visto (se vuoi usarlo)
+    localStorage.setItem("rr_xmas_seen", "1");
   }, []);
 
-  const title = useMemo(() => {
-    return first === "1" ? "Buon Natale 🎄" : "Natale";
-  }, [first]);
-
-  if (!mounted) return null;
-
   return (
-    <main className="rr-container">
-      <h1 className="text-3xl font-semibold mb-3">{title}</h1>
-    <p className="opacity-90 max-w-xl">
-  {typeof SPECIAL_MESSAGE === "string"
-    ? SPECIAL_MESSAGE
-    : SPECIAL_MESSAGE?.body ?? "💛"}
-</p>
+    <main className="min-h-screen flex items-center justify-center px-6">
+      <div className="max-w-xl w-full rounded-3xl bg-black/30 backdrop-blur-xl border border-white/10 p-8 shadow-xl">
+        <h1 className="text-3xl font-semibold mb-4">
+          {SPECIAL_MESSAGE.title}
+        </h1>
 
+        <p className="whitespace-pre-line opacity-90 leading-relaxed">
+          {SPECIAL_MESSAGE.body}
+        </p>
+      </div>
     </main>
   );
 }
