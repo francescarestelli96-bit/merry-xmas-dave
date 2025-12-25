@@ -1,100 +1,62 @@
-@import "tailwindcss";
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* ==============
-   Design tokens
-   ============== */
 :root {
-  --bg1: 9 11 18;
-  --bg2: 14 16 26;
-  --bg3: 18 22 34;
-
-  --card: 255 255 255;
-  --cardA: 0.08;
-
-  --text: 244 244 245;
-  --muted: 161 161 170;
-
-  --accent: 125 211 252; /* default: airy */
-  --accent2: 244 114 182;
-
-  --ring: 255 255 255;
-  --ringA: 0.18;
+  color-scheme: dark;
+  --bg0: #070813;
+  --bg1: #0b1220;
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass2: rgba(255, 255, 255, 0.09);
+  --stroke: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.68);
 }
 
-/* Scene themes (set via JS by setting data-scene on <html>) */
-html[data-scene="rain"] {
-  --accent: 125 211 252;
-  --accent2: 56 189 248;
-  --bg1: 7 10 18;
-  --bg2: 10 14 26;
-  --bg3: 18 26 46;
-}
-html[data-scene="ocean"] {
-  --accent: 45 212 191;
-  --accent2: 34 211 238;
-  --bg1: 4 14 20;
-  --bg2: 5 24 35;
-  --bg3: 10 40 55;
-}
-html[data-scene="asmr"] {
-  --accent: 244 114 182;
-  --accent2: 251 191 36;
-  --bg1: 16 10 24;
-  --bg2: 24 12 36;
-  --bg3: 38 16 56;
-}
-html[data-scene="soft"] {
-  --accent: 251 191 36;
-  --accent2: 244 114 182;
-  --bg1: 18 12 10;
-  --bg2: 30 18 12;
-  --bg3: 48 28 16;
-}
-html[data-scene="xmas"] {
-  --accent: 52 211 153;
-  --accent2: 248 113 113;
-  --bg1: 7 16 12;
-  --bg2: 10 24 18;
-  --bg3: 16 36 26;
-}
-
-html,
+* { box-sizing: border-box; }
+html, body { height: 100%; }
 body {
-  height: 100%;
+  margin: 0;
+  background: radial-gradient(1200px 700px at 20% 10%, rgba(126, 87, 255, 0.24), transparent 60%),
+              radial-gradient(900px 600px at 85% 20%, rgba(0, 209, 255, 0.18), transparent 55%),
+              radial-gradient(900px 700px at 45% 85%, rgba(255, 122, 214, 0.14), transparent 60%),
+              linear-gradient(180deg, var(--bg0), var(--bg1));
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
-body {
-  color: rgb(var(--text));
+a { color: inherit; text-decoration: none; }
+button, input, textarea { font: inherit; color: inherit; }
+
+.app-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
   background:
-    radial-gradient(900px 600px at 20% 10%, rgba(var(--accent), 0.18), transparent 55%),
-    radial-gradient(900px 600px at 80% 20%, rgba(var(--accent2), 0.12), transparent 55%),
-    radial-gradient(900px 600px at 30% 90%, rgba(255, 255, 255, 0.06), transparent 55%),
-    linear-gradient(135deg, rgb(var(--bg1)), rgb(var(--bg2)) 55%, rgb(var(--bg3)));
-  background-attachment: fixed;
+    radial-gradient(600px 360px at 50% 0%, rgba(255,255,255,0.06), transparent 60%),
+    radial-gradient(420px 260px at 80% 90%, rgba(255,255,255,0.04), transparent 60%);
+  filter: blur(0px);
+  opacity: 1;
+  z-index: 0;
 }
 
-/* Layout helpers (NO @apply) */
-.rr-shell {
-  min-height: 100vh;
+/* 3-4 classi custom max: glass, card, focus */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+
+.card {
+  border-radius: 18px;
   padding: 18px;
 }
-.rr-container {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 18px;
-}
 
-/* Soft card */
-.rr-card {
-  background: rgba(var(--card), var(--cardA));
-  border: 1px solid rgba(var(--ring), var(--ringA));
-  border-radius: 20px;
-  backdrop-filter: blur(18px);
-}
-
-/* Nice focus ring */
-:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(var(--accent), 0.35);
-  border-radius: 14px;
+.focus-ring:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.9);
+  outline-offset: 2px;
+  border-radius: 12px;
 }

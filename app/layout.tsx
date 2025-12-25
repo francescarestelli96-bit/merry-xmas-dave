@@ -1,28 +1,30 @@
-import "./globals.css";
+// app/layout.tsx
 import type { Metadata } from "next";
+import "./globals.css";
 import Navbar from "@/components/Navbar";
-import ClientGate from "./ClientGate";
 import DiaryDock from "@/components/DiaryDock";
 
 export const metadata: Metadata = {
   title: "Relax Room",
-  description: "Una stanza piccola, calma, tua.",
+  description: "A soft, dreamy relax room — merry xmas, Dave.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="it" data-scene="rain">
+    <html lang="it" suppressHydrationWarning>
       <body>
-        <ClientGate />
-        <div className="rr-shell">
-          <div className="rr-container rr-card">
-            <Navbar />
-            <main className="mt-6">{children}</main>
-          </div>
-        </div>
+        {/* Background */}
+        <div className="app-bg" aria-hidden="true" />
 
-        {/* sempre disponibile */}
-        <DiaryDock />
+        <div className="relative min-h-dvh">
+          <Navbar />
+          <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 sm:px-6">
+            {children}
+          </main>
+
+          {/* Dock globale */}
+          <DiaryDock />
+        </div>
       </body>
     </html>
   );

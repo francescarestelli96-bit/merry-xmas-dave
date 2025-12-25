@@ -1,47 +1,63 @@
+// components/SoundMixer.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AUDIO_SRC, SCENES, type SceneId } from "@/lib/audio";
-import { getSavedScene, setScene } from "@/lib/themes";
+
+type Scene = {
+  id: string;
+  name: string;
+  description: string;
+  // Metti i tuoi file in /public/sounds/*.mp3 (opzionale)
+  src: string;
+};
+
+const SCENES: Scene[] = [
+  { id: "rain", name: "Pioggia", description: "soft rain, zero drama", src: "/sounds/rain.mp3" },
+  { id: "ocean", name: "Oceano", description: "onde lente, cervello spento", src: "/sounds/ocean.mp3" },
+  { id: "fire", name: "Camino", description: "crepitio caldo, vibe cozy", src: "/sounds/fireplace.mp3" },
+  { id: "night", name: "Notte", description: "ambience minimale", src: "/sounds/night.mp3" },
+];
+
+function clamp(n: number, a: number, b: number) {
+  return Math.min(b, Math.max(a, n));
+}
 
 export default function SoundMixer() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [scene, setSceneState] = useState<SceneId>("rain");
+  const [sceneId, setSceneId] = useState(SCENES[0]?.id ?? "rain");
+  const [volume, setVolume] = useState(0.65);
   const [playing, setPlaying] = useState(false);
-  const [vol, setVol] = useState(0.6);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const src = useMemo(() => AUDIO_SRC[scene], [scene]);
+  const scene = useMemo(
+    () => SCENES.find((s) => s.id === sceneId) ?? SCENES[0],
+    [sceneId]
+  );
 
-  useEffect(() => {
-    const saved = getSavedScene();
-    if (saved) {
-      setSceneState(saved);
-      setScene(saved);
-    } else {
-      setScene("rain");
-    }
-  }, []);
-
+  // Sync volume
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
-    a.volume = vol;
-  }, [vol]);
+    a.volume = clamp(volume, 0, 1);
+  }, [volume]);
 
+  // Change source safely
   useEffect(() => {
-    // when scene changes, keep vibe consistent
     const a = audioRef.current;
     if (!a) return;
 
-    a.src = src;
+    const wasPlaying = playing;
+    a.pause();
+    a.src = scene?.src ?? "";
     a.load();
 
-    if (playing) {
-      a.play().catch(() => setPlaying(false));
+    if (wasPlaying) {
+      // best-effort play (autoplay policies may block)
+      a.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
     }
-  }, [src, playing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneId]);
 
-  function togglePlay() {
+  const toggle = async () => {
     const a = audioRef.current;
     if (!a) return;
 
@@ -51,71 +67,77 @@ export default function SoundMixer() {
       return;
     }
 
-    a.play()
-      .then(() => setPlaying(true))
-      .catch(() => setPlaying(false));
-  }
-
-  function pickScene(next: SceneId) {
-    setSceneState(next);
-    setScene(next);
-  }
+    try {
+      await a.play();
+      setPlaying(true);
+    } catch {
+      // Autoplay blocked: user can retry, but we don't crash.
+      setPlaying(false);
+    }
+  };
 
   return (
-    <div className="rr-card p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+    <div className="grid gap-4">
+      <div className="glass card">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-sm font-semibold tracking-tight">Scene</div>
+            <div className="mt-1 text-xs text-white/65">{scene?.description}</div>
+          </div>
+
           <button
-            onClick={togglePlay}
-            className="rounded-2xl px-4 py-2 text-sm font-semibold
-                       bg-white/10 hover:bg-white/15 border border-white/15"
+            onClick={toggle}
+            className="focus-ring rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15 transition ring-1 ring-white/10"
+            type="button"
           >
-            {playing ? "⏸ Pausa" : "▶ Play"}
+            {playing ? "Pausa" : "Play"}
           </button>
+        </div>
 
-          <div className="flex items-center gap-2 text-sm text-white/70">
-            <span className="hidden sm:inline">Volume</span>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={vol}
-              onChange={(e) => setVol(parseFloat(e.target.value))}
-            />
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {SCENES.map((s) => {
+            const active = s.id === sceneId;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSceneId(s.id)}
+                className={[
+                  "focus-ring text-left rounded-2xl px-4 py-3 transition ring-1",
+                  active
+                    ? "bg-white/15 ring-white/20"
+                    : "bg-white/5 hover:bg-white/10 ring-white/10",
+                ].join(" ")}
+              >
+                <div className="text-sm font-medium">{s.name}</div>
+                <div className="mt-1 text-xs text-white/60">{s.description}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-5">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold tracking-tight">Volume</div>
+            <div className="text-xs text-white/65">{Math.round(volume * 100)}%</div>
           </div>
 
-          <div className="text-sm text-white/65">
-            Mood: <span className="text-white/90 font-semibold">{scene}</span>
+          <input
+            className="mt-3 w-full accent-white"
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+          />
+          <div className="mt-2 text-xs text-white/55">
+            Tip: se su mobile non parte al primo colpo, premi Play una seconda volta (policy autoplay, classico).
           </div>
         </div>
 
-        <div className="text-xs text-white/55">
-          Tip: scegli un suono e lascialo fare il lavoro sporco.
-        </div>
+        <audio ref={audioRef} loop preload="none" />
       </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {SCENES.map((s) => {
-          const active = s.id === scene;
-          return (
-            <button
-              key={s.id}
-              onClick={() => pickScene(s.id)}
-              className={[
-                "text-left rounded-2xl p-4 transition",
-                "border border-white/10 bg-white/5 hover:bg-white/10",
-                active ? "bg-white/15 border-white/20" : "",
-              ].join(" ")}
-            >
-              <div className="text-base font-semibold">{s.label}</div>
-              <div className="text-sm text-white/60">{s.subtitle}</div>
-            </button>
-          );
-        })}
-      </div>
-
-      <audio ref={audioRef} loop />
     </div>
   );
 }
