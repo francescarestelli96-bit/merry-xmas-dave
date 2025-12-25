@@ -1,4 +1,3 @@
-// PATH: app/xmas/XmasClient.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -28,10 +27,13 @@ export default function XmasClient() {
 
   return (
     <main className="rr-container">
-      <h1 style={{ fontSize: 28, marginBottom: 12 }}>{title}</h1>
-      <p style={{ opacity: 0.85, maxWidth: 720 }}>
-        {SPECIAL_MESSAGE || "💛"}
-      </p>
+      <h1 className="text-3xl font-semibold mb-3">{title}</h1>
+    <p className="opacity-90 max-w-xl">
+  {typeof SPECIAL_MESSAGE === "string"
+    ? SPECIAL_MESSAGE
+    : SPECIAL_MESSAGE?.body ?? "💛"}
+</p>
+
     </main>
   );
 }
