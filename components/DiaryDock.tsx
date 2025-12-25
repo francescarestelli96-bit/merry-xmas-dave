@@ -19,7 +19,6 @@ export default function DiaryDock() {
     };
     window.addEventListener("keydown", onKey);
 
-    // focus
     setTimeout(() => panelRef.current?.focus(), 0);
 
     return () => {
@@ -33,36 +32,34 @@ export default function DiaryDock() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-[60] rounded-2xl bg-white/12 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/18 transition shadow-[0_18px_60px_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+        className="fixed bottom-5 right-5 z-[60] rounded-2xl bg-white/12 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/18 transition shadow-[0_20px_80px_rgba(0,0,0,0.55)] focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
       >
         📝 Diario
       </button>
 
       {open && (
         <div className="fixed inset-0 z-[80]">
-          {/* overlay */}
           <button
+            type="button"
             aria-label="Chiudi"
             className="absolute inset-0 bg-black/65 backdrop-blur-sm"
             onClick={() => setOpen(false)}
-            type="button"
           />
 
-          {/* modal */}
           <div className="absolute inset-0 flex items-end justify-center p-4 sm:items-center">
             <div
               ref={panelRef}
               tabIndex={-1}
               role="dialog"
               aria-modal="true"
-              className="w-full max-w-xl rounded-3xl bg-white/7 ring-1 ring-white/12 backdrop-blur-xl p-4 sm:p-5 outline-none shadow-[0_30px_120px_rgba(0,0,0,0.6)]"
+              className="w-full max-w-2xl rounded-[28px] bg-white/7 ring-1 ring-white/12 backdrop-blur-xl p-4 sm:p-5 outline-none shadow-[0_30px_140px_rgba(0,0,0,0.7)]"
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3 px-1">
                 <div className="text-sm font-semibold tracking-tight">Quick diary</div>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-xl px-3 py-2 text-sm text-white/70 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+                  className="rounded-2xl bg-white/6 px-3 py-2 text-sm font-semibold text-white/75 ring-1 ring-white/10 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
                 >
                   Chiudi
                 </button>

@@ -3,11 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type Note = {
-  id: string;
-  createdAt: number;
-  text: string;
-};
+type Note = { id: string; createdAt: number; text: string };
 
 const STORAGE_KEY = "relax_room_notes_v1";
 const MAX_LEN = 500;
@@ -28,11 +24,7 @@ function loadNotes(): Note[] {
 }
 
 function saveNotes(notes: Note[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-  } catch {
-    // ignore
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch {}
 }
 
 function uid() {
@@ -75,15 +67,13 @@ export default function DiaryPanel({ compact = false }: { compact?: boolean }) {
   };
 
   const clearAll = () => {
-    const next: Note[] = [];
-    setNotes(next);
-    saveNotes(next);
+    setNotes([]);
+    saveNotes([]);
   };
 
   return (
     <div className="grid gap-4">
-      {/* composer */}
-      <div className="rounded-3xl bg-white/6 ring-1 ring-white/12 p-4 sm:p-5">
+      <div className="rounded-[28px] bg-white/6 ring-1 ring-white/12 backdrop-blur-xl p-5 sm:p-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)]">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-sm font-semibold tracking-tight">Diario</div>
@@ -96,10 +86,9 @@ export default function DiaryPanel({ compact = false }: { compact?: boolean }) {
             <button
               type="button"
               onClick={clearAll}
-              className="rounded-xl px-3 py-2 text-xs text-white/70 hover:bg-white/10 transition ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
-              title="Svuota"
+              className="rounded-2xl bg-white/6 px-3 py-2 text-xs font-semibold text-white/75 ring-1 ring-white/10 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
             >
-              Svuota tutto
+              Svuota
             </button>
           )}
         </div>
@@ -108,12 +97,12 @@ export default function DiaryPanel({ compact = false }: { compact?: boolean }) {
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value.slice(0, MAX_LEN))}
-            rows={compact ? 4 : 5}
-            placeholder="Scrivi qui… (anche una sola frase)"
-            className="w-full resize-none bg-transparent px-4 py-3 text-sm leading-relaxed text-white placeholder:text-white/35 focus:outline-none"
+            rows={compact ? 4 : 6}
+            placeholder="Scrivi qui… (anche solo una frase)"
+            className="w-full resize-none bg-transparent px-4 py-4 text-sm leading-relaxed text-white placeholder:text-white/35 focus:outline-none"
           />
-          <div className="flex items-center justify-between gap-3 px-4 pb-3">
-            <div className="text-xs text-white/50">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 pb-4">
+            <div className="text-xs text-white/55">
               {draft.length}/{MAX_LEN} •{" "}
               <span className={remaining < 40 ? "text-amber-300/80" : ""}>
                 {remaining} rimasti
@@ -124,18 +113,19 @@ export default function DiaryPanel({ compact = false }: { compact?: boolean }) {
               <button
                 type="button"
                 onClick={() => setDraft("")}
-                className="rounded-xl px-3 py-2 text-xs text-white/65 hover:bg-white/10 transition ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+                className="rounded-2xl bg-white/6 px-3 py-2 text-xs font-semibold text-white/70 ring-1 ring-white/10 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
               >
                 Pulisci
               </button>
+
               <button
                 type="button"
                 onClick={add}
                 disabled={!canSave}
                 className={[
-                  "rounded-xl px-4 py-2 text-sm font-semibold transition ring-1 focus:outline-none focus:ring-2 focus:ring-indigo-400/60",
+                  "rounded-2xl px-4 py-2 text-sm font-semibold ring-1 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60",
                   canSave
-                    ? "bg-white/12 hover:bg-white/18 ring-white/15 text-white"
+                    ? "bg-white/12 ring-white/15 hover:bg-white/18 text-white"
                     : "bg-white/5 ring-white/10 text-white/40 cursor-not-allowed",
                 ].join(" ")}
               >
@@ -146,25 +136,23 @@ export default function DiaryPanel({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      {/* list */}
       <div className="grid gap-3">
         {notes.length === 0 ? (
-          <div className="rounded-3xl bg-white/5 ring-1 ring-white/10 p-4 sm:p-5 text-sm text-white/70">
+          <div className="rounded-[28px] bg-white/5 ring-1 ring-white/10 p-5 text-sm text-white/70">
             Nessuna nota ancora. Inizia easy: una frase, due parole, anche solo “oggi respiro”.
           </div>
         ) : (
           notes.map((n) => (
             <div
               key={n.id}
-              className="rounded-3xl bg-white/5 ring-1 ring-white/10 p-4 sm:p-5 hover:bg-white/6 transition"
+              className="rounded-[28px] bg-white/5 ring-1 ring-white/10 p-5 hover:bg-white/6 transition"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="text-xs text-white/55">{formatDate(n.createdAt)}</div>
                 <button
                   type="button"
                   onClick={() => remove(n.id)}
-                  className="rounded-xl px-3 py-2 text-xs text-white/65 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
-                  title="Elimina"
+                  className="rounded-2xl bg-white/6 px-3 py-2 text-xs font-semibold text-white/70 ring-1 ring-white/10 hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
                 >
                   Elimina
                 </button>

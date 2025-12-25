@@ -5,25 +5,28 @@
 
 :root {
   color-scheme: dark;
-  --bg0: #070813;
-  --bg1: #0b1220;
+  --bg0: #060712;
+  --bg1: #090f1d;
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.70);
+  --faint: rgba(255, 255, 255, 0.55);
+  --stroke: rgba(255, 255, 255, 0.12);
   --glass: rgba(255, 255, 255, 0.06);
   --glass2: rgba(255, 255, 255, 0.09);
-  --stroke: rgba(255, 255, 255, 0.12);
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.68);
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: radial-gradient(1200px 700px at 20% 10%, rgba(126, 87, 255, 0.24), transparent 60%),
-              radial-gradient(900px 600px at 85% 20%, rgba(0, 209, 255, 0.18), transparent 55%),
-              radial-gradient(900px 700px at 45% 85%, rgba(255, 122, 214, 0.14), transparent 60%),
-              linear-gradient(180deg, var(--bg0), var(--bg1));
   color: var(--text);
+  background:
+    radial-gradient(1100px 700px at 15% 10%, rgba(99,102,241,0.22), transparent 60%),
+    radial-gradient(900px 600px at 85% 20%, rgba(34,211,238,0.16), transparent 55%),
+    radial-gradient(900px 700px at 45% 90%, rgba(236,72,153,0.14), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  letter-spacing: -0.01em;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -34,29 +37,11 @@ button, input, textarea { font: inherit; color: inherit; }
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(600px 360px at 50% 0%, rgba(255,255,255,0.06), transparent 60%),
-    radial-gradient(420px 260px at 80% 90%, rgba(255,255,255,0.04), transparent 60%);
-  filter: blur(0px);
-  opacity: 1;
+    radial-gradient(700px 420px at 50% 0%, rgba(255,255,255,0.06), transparent 60%),
+    radial-gradient(520px 340px at 82% 92%, rgba(255,255,255,0.04), transparent 60%);
   z-index: 0;
 }
 
-/* 3-4 classi custom max: glass, card, focus */
-.glass {
-  background: var(--glass);
-  border: 1px solid var(--stroke);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
-}
-
-.card {
-  border-radius: 18px;
-  padding: 18px;
-}
-
-.focus-ring:focus-visible {
-  outline: 2px solid rgba(99, 102, 241, 0.9);
-  outline-offset: 2px;
-  border-radius: 12px;
-}
+/* small utility: hide scrollbar in horizontal nav */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

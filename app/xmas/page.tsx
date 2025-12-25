@@ -6,17 +6,10 @@ export const dynamic = "force-static";
 
 export default function XmasPage() {
   return (
-    <section className="mx-auto mt-6 max-w-3xl">
-      <div className="relative overflow-hidden rounded-3xl bg-white/6 ring-1 ring-white/12 backdrop-blur-xl p-6 sm:p-8 shadow-[0_30px_120px_rgba(0,0,0,0.55)]">
-        {/* dreamy glow */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-pink-400/18 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-indigo-500/18 blur-3xl"
-        />
+    <section className="mx-auto max-w-3xl">
+      <div className="relative overflow-hidden rounded-[28px] bg-white/6 ring-1 ring-white/12 backdrop-blur-xl p-6 sm:p-8 shadow-[0_30px_120px_rgba(0,0,0,0.55)]">
+        <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-pink-400/18 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-indigo-500/18 blur-3xl" />
 
         <div className="relative">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/8 px-3 py-1 text-xs text-white/70 ring-1 ring-white/10">
@@ -48,7 +41,7 @@ export default function XmasPage() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 text-xs text-white/60">
-            Piccolo promemoria: oggi si va piano. Domani si conquista il mondo. 🙂
+            Oggi si va piano. Domani si spacca. 🙂
           </div>
         </div>
       </div>

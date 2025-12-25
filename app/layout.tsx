@@ -13,16 +13,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="it" suppressHydrationWarning>
       <body>
-        {/* Background */}
         <div className="app-bg" aria-hidden="true" />
-
         <div className="relative min-h-dvh">
           <Navbar />
-          <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 sm:px-6">
+          <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6">
             {children}
           </main>
-
-          {/* Dock globale */}
           <DiaryDock />
         </div>
       </body>
