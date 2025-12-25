@@ -1,8 +1,7 @@
-// PATH: lib/storage.ts
-export function getJson<T>(key: string, fallback: T): T {
+export function readLS<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = localStorage.getItem(key);
+    const raw = window.localStorage.getItem(key);
     if (!raw) return fallback;
     return JSON.parse(raw) as T;
   } catch {
@@ -10,7 +9,9 @@ export function getJson<T>(key: string, fallback: T): T {
   }
 }
 
-export function setJson<T>(key: string, value: T) {
+export function writeLS<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
 }
