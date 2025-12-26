@@ -7,7 +7,7 @@ export type Theme = {
   description: string;
   bg0: string;
   bg1: string;
-  accent: string; // glow color
+  accent: string; // glow
 };
 
 export const THEMES: Theme[] = [
@@ -41,7 +41,7 @@ export const THEMES: Theme[] = [
     description: "cosmico, viola, stellare",
     bg0: "#070515",
     bg1: "#140a25",
-    accent: "rgba(167,139,250,0.20)",
+    accent: "rgba(167,139,250,0.22)",
   },
 ];
 

@@ -5,13 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_THEME, getTheme, THEMES, type ThemeId } from "@/lib/themes";
 
 type SceneId = "rain" | "ocean" | "asmr" | "soft" | "xmas";
-
-type Scene = {
-  id: SceneId;
-  name: string;
-  vibe: string;
-  src: string;
-};
+type Scene = { id: SceneId; name: string; vibe: string; src: string };
 
 const SCENES: Scene[] = [
   { id: "rain", name: "Pioggia", vibe: "lavaggio mentale, calma", src: "/audio/rain.mp3" },
@@ -25,23 +19,13 @@ function clamp(n: number, a: number, b: number) {
   return Math.min(b, Math.max(a, n));
 }
 
-function pill(active = false) {
-  return [
-    "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold ring-1 transition",
-    "focus:outline-none focus:ring-2 focus:ring-indigo-400/60",
-    active
-      ? "bg-white/12 ring-white/15 hover:bg-white/18 text-white"
-      : "bg-white/6 ring-white/12 hover:bg-white/10 text-white/85",
-  ].join(" ");
-}
-
 export default function SoundMixer() {
   const [sceneId, setSceneId] = useState<SceneId>("rain");
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME);
-  const [volume, setVolume] = useState(0.75);
+  const [volume, setVolume] = useState(0.8);
+  const [enabled, setEnabled] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [enabled, setEnabled] = useState(false); // <-- unlock audio
-  const [status, setStatus] = useState<string>("");
+  const [hint, setHint] = useState<string>("");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -56,7 +40,7 @@ export default function SoundMixer() {
     } catch {}
   }, []);
 
-  // apply theme -> CSS vars
+  // apply theme vars
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--bg0", theme.bg0);
@@ -67,7 +51,7 @@ export default function SoundMixer() {
     } catch {}
   }, [theme]);
 
-  // init audio element
+  // init audio
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
@@ -85,13 +69,13 @@ export default function SoundMixer() {
     a.volume = clamp(volume, 0, 1);
   }, [volume]);
 
-  // change scene: keep playing if already playing
+  // scene change
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
 
     const wasPlaying = playing;
-    setStatus("");
+    setHint("");
 
     a.pause();
     a.src = scene.src;
@@ -102,7 +86,7 @@ export default function SoundMixer() {
         .then(() => setPlaying(true))
         .catch(() => {
           setPlaying(false);
-          setStatus("Audio bloccato: premi prima “Abilita audio”, poi Play.");
+          setHint("Audio bloccato dal browser: clicca “Abilita audio”, poi Play.");
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,19 +95,17 @@ export default function SoundMixer() {
   const enableAudio = async () => {
     const a = audioRef.current;
     if (!a) return;
+    setHint("");
 
-    // IMPORTANT: must be triggered by user gesture
-    setStatus("");
     try {
-      // tiny play-pause to unlock
-      await a.play();
+      await a.play(); // user gesture unlock
       a.pause();
       a.currentTime = 0;
       setEnabled(true);
-      setStatus("Audio abilitato ✅");
+      setHint("Audio abilitato ✅");
     } catch {
       setEnabled(false);
-      setStatus("Non riesco ad abilitare l’audio qui. Prova a cliccare Play una volta, poi di nuovo.");
+      setHint("Non riesco a sbloccare l’audio qui. Riprova e poi premi Play.");
     }
   };
 
@@ -131,12 +113,12 @@ export default function SoundMixer() {
     const a = audioRef.current;
     if (!a) return;
 
-    setStatus("");
-
     if (!enabled) {
-      setStatus("Prima: clicca “Abilita audio” (serve per i browser).");
+      setHint("Prima: “Abilita audio”. È la policy dei browser, non sei tu.");
       return;
     }
+
+    setHint("");
 
     if (playing) {
       a.pause();
@@ -149,7 +131,7 @@ export default function SoundMixer() {
       setPlaying(true);
     } catch {
       setPlaying(false);
-      setStatus("Play fallito. Controlla volume e che il file esista: " + scene.src);
+      setHint("Play fallito. (Se sei su mobile: tap → Abilita audio → Play).");
     }
   };
 
@@ -159,40 +141,55 @@ export default function SoundMixer() {
     a.pause();
     a.currentTime = 0;
     setPlaying(false);
-    setStatus("");
+    setHint("");
   };
 
   return (
-    <div className="relative rounded-[28px] bg-white/6 ring-1 ring-white/12 backdrop-blur-xl p-5 sm:p-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)]">
+    <section className="rr-card p-5 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <div>
-            <div className="text-sm font-semibold tracking-tight">Scene</div>
-            <div className="mt-1 text-sm text-white/70">{scene.vibe}</div>
+          <div className="rr-badge">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400/80" />
+            <span>sound • themes • chill</span>
           </div>
 
-          <div>
-            <div className="text-sm font-semibold tracking-tight">Theme</div>
-            <div className="mt-1 text-sm text-white/70">{theme.description}</div>
+          <div className="text-xl sm:text-2xl font-semibold tracking-tight">
+            {scene.name}
           </div>
+          <div className="text-sm text-white/70">{scene.vibe}</div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={enableAudio} className={pill(!enabled)}>
-            🔊 Abilita audio
+          <button type="button" onClick={enableAudio} className="rr-btn" aria-pressed={enabled}>
+            🔊 {enabled ? "Audio ok" : "Abilita audio"}
           </button>
-          <button type="button" onClick={togglePlay} className={pill(true)}>
+
+          <button type="button" onClick={togglePlay} className="rr-btn rr-btn-primary">
             {playing ? "⏸ Pausa" : "▶︎ Play"}
           </button>
-          <button type="button" onClick={stop} className={pill(false)}>
+
+          <button type="button" onClick={stop} className="rr-btn">
             ⟲ Stop
           </button>
         </div>
       </div>
 
-      {/* theme selector */}
-      <div className="mt-5 rounded-3xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div className="text-sm font-semibold tracking-tight">Scegli theme</div>
+      {hint && (
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-white/75">
+          {hint}
+        </div>
+      )}
+
+      {/* Themes */}
+      <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold">Theme</div>
+            <div className="mt-1 text-xs text-white/60">{theme.description}</div>
+          </div>
+          <div className="text-xs text-white/55">attivo: <span className="text-white/80">{theme.name}</span></div>
+        </div>
+
         <div className="mt-3 grid gap-2 sm:grid-cols-4">
           {THEMES.map((t) => {
             const active = t.id === themeId;
@@ -202,21 +199,32 @@ export default function SoundMixer() {
                 type="button"
                 onClick={() => setThemeId(t.id)}
                 className={[
-                  "rounded-3xl p-3 text-left ring-1 transition",
-                  "focus:outline-none focus:ring-2 focus:ring-indigo-400/60",
-                  active ? "bg-white/14 ring-white/18" : "bg-white/5 ring-white/10 hover:bg-white/8",
+                  "rounded-3xl p-3 text-left border transition",
+                  active ? "bg-white/12 border-white/18" : "bg-white/5 border-white/10 hover:bg-white/8",
                 ].join(" ")}
               >
-                <div className="text-sm font-semibold">{t.name}</div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold">{t.name}</div>
+                  <span className={active ? "text-[11px] text-emerald-300/80" : "text-[11px] text-white/45"}>
+                    {active ? "attivo" : "usa"}
+                  </span>
+                </div>
+
                 <div className="mt-1 text-xs text-white/60">{t.description}</div>
+
+                <div className="mt-3 h-8 w-full rounded-2xl border border-white/10"
+                  style={{
+                    background: `radial-gradient(120px 60px at 25% 30%, ${t.accent}, transparent 65%), linear-gradient(180deg, ${t.bg0}, ${t.bg1})`,
+                  }}
+                />
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* scene selector */}
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      {/* Scene grid */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {SCENES.map((s) => {
           const active = s.id === sceneId;
           return (
@@ -225,15 +233,12 @@ export default function SoundMixer() {
               type="button"
               onClick={() => setSceneId(s.id)}
               className={[
-                "text-left rounded-3xl p-4 ring-1 transition",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-400/60",
-                active
-                  ? "bg-white/14 ring-white/18 shadow-[0_16px_50px_rgba(0,0,0,0.35)]"
-                  : "bg-white/5 ring-white/10 hover:bg-white/8",
+                "rounded-3xl p-4 text-left border transition",
+                active ? "bg-white/12 border-white/18" : "bg-white/5 border-white/10 hover:bg-white/8",
               ].join(" ")}
             >
               <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-semibold tracking-tight">{s.name}</div>
+                <div className="text-sm font-semibold">{s.name}</div>
                 <span className={active ? "text-xs text-emerald-300/80" : "text-xs text-white/45"}>
                   {active ? "attiva" : "seleziona"}
                 </span>
@@ -244,13 +249,12 @@ export default function SoundMixer() {
         })}
       </div>
 
-      {/* volume */}
-      <div className="mt-5 rounded-3xl bg-white/5 ring-1 ring-white/10 p-4">
+      {/* Volume */}
+      <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="text-sm font-semibold tracking-tight">Volume</div>
+          <div className="text-sm font-semibold">Volume</div>
           <div className="text-xs text-white/60">{Math.round(volume * 100)}%</div>
         </div>
-
         <div className="mt-3">
           <input
             className="w-full accent-white"
@@ -262,18 +266,12 @@ export default function SoundMixer() {
             onChange={(e) => setVolume(Number(e.target.value))}
           />
           <div className="mt-2 text-xs text-white/55">
-            Se senti “niente”: premi prima <span className="text-white/80">Abilita audio</span>, poi Play.
+            Mobile: tap → <span className="text-white/80">Abilita audio</span> → Play. Sempre.
           </div>
-
-          {status && (
-            <div className="mt-3 rounded-2xl bg-white/6 ring-1 ring-white/10 p-3 text-xs text-white/75">
-              {status}
-            </div>
-          )}
         </div>
       </div>
 
       <audio ref={audioRef} playsInline />
-    </div>
+    </section>
   );
 }
