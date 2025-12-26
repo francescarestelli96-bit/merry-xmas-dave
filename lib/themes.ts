@@ -7,8 +7,8 @@ export type Theme = {
   description: string;
   bg0: string;
   bg1: string;
-  accent: string;
-  stars?: boolean; // solo per zodiaco
+  accent: string; // glow
+  text: string;   // ✅ testo per il tema (Alba = scuro)
 };
 
 export const THEMES: Theme[] = [
@@ -18,7 +18,8 @@ export const THEMES: Theme[] = [
     description: "chiaro, morbido, aria nuova",
     bg0: "#f6f7fb",
     bg1: "#e9ecf5",
-    accent: "rgba(255,183,77,0.35)", // pesca/oro soft
+    accent: "rgba(255,183,77,0.35)",        // pesca/oro soft
+    text: "rgba(15,23,42,0.92)",            // slate-900 (leggibile su chiaro)
   },
   {
     id: "bosco",
@@ -27,6 +28,7 @@ export const THEMES: Theme[] = [
     bg0: "#040a08",
     bg1: "#071814",
     accent: "rgba(52,211,153,0.18)",
+    text: "rgba(255,255,255,0.92)",
   },
   {
     id: "notte",
@@ -35,6 +37,7 @@ export const THEMES: Theme[] = [
     bg0: "#050616",
     bg1: "#0a0f26",
     accent: "rgba(99,102,241,0.20)",
+    text: "rgba(255,255,255,0.92)",
   },
   {
     id: "zodiaco",
@@ -42,8 +45,8 @@ export const THEMES: Theme[] = [
     description: "blu cosmico, stelle protettive",
     bg0: "#020617",
     bg1: "#050b2e",
-    accent: "rgba(56,189,248,0.25)", // azzurro stellare
-    stars: true,
+    accent: "rgba(56,189,248,0.25)",        // azzurro stellare
+    text: "rgba(226,232,240,0.95)",         // slate-200 (soft su blu scuro)
   },
 ];
 

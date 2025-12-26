@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_THEME, getTheme, THEMES, type ThemeId } from "@/lib/themes";
+import { DEFAULT_THEME, getTheme, THEMES, type ThemeId, type Theme } from "@/lib/themes";
 
 type SceneId = "rain" | "ocean" | "asmr" | "soft" | "xmas";
 type Scene = { id: SceneId; name: string; vibe: string; src: string };
@@ -40,19 +40,21 @@ export default function SoundMixer() {
     } catch {}
   }, []);
 
-  // apply theme vars
-useEffect(() => {
-  const root = document.documentElement;
-  root.style.setProperty("--bg0", theme.bg0);
-  root.style.setProperty("--bg1", theme.bg1);
-  root.style.setProperty("--accent", theme.accent);
-  root.setAttribute("data-theme", theme.id);
+  // apply theme vars (bg + accent + TEXT!) + data-theme for zodiaco overlays
+  useEffect(() => {
+    const root = document.documentElement;
+  const t = theme as Theme; // ora ha .text tipizzato
+root.style.setProperty("--bg0", t.bg0);
+root.style.setProperty("--bg1", t.bg1);
+root.style.setProperty("--accent", t.accent);
+root.style.setProperty("--text", t.text);
+root.setAttribute("data-theme", t.id);
 
-  try {
-    localStorage.setItem("rr_theme_v1", theme.id);
-  } catch {}
-}, [theme]);
 
+    try {
+      localStorage.setItem("rr_theme_v1", theme.id);
+    } catch {}
+  }, [theme]);
 
   // init audio
   useEffect(() => {
@@ -63,6 +65,7 @@ useEffect(() => {
     a.volume = clamp(volume, 0, 1);
     a.src = scene.src;
     a.load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // volume
@@ -159,7 +162,9 @@ useEffect(() => {
           <div className="text-xl sm:text-2xl font-semibold tracking-tight">
             {scene.name}
           </div>
-          <div className="text-sm text-white/70">{scene.vibe}</div>
+
+          {/* niente text-white hardcoded: così Alba è leggibile */}
+          <div className="text-sm opacity-75">{scene.vibe}</div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -178,7 +183,7 @@ useEffect(() => {
       </div>
 
       {hint && (
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-white/75">
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs opacity-85">
           {hint}
         </div>
       )}
@@ -188,9 +193,12 @@ useEffect(() => {
         <div className="flex items-end justify-between gap-3">
           <div>
             <div className="text-sm font-semibold">Theme</div>
-            <div className="mt-1 text-xs text-white/60">{theme.description}</div>
+            <div className="mt-1 text-xs opacity-70">{theme.description}</div>
           </div>
-          <div className="text-xs text-white/55">attivo: <span className="text-white/80">{theme.name}</span></div>
+
+          <div className="text-xs opacity-70">
+            attivo: <span className="font-semibold opacity-95">{theme.name}</span>
+          </div>
         </div>
 
         <div className="mt-3 grid gap-2 sm:grid-cols-4">
@@ -208,14 +216,15 @@ useEffect(() => {
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold">{t.name}</div>
-                  <span className={active ? "text-[11px] text-emerald-300/80" : "text-[11px] text-white/45"}>
+                  <span className={active ? "text-[11px] text-emerald-400/80" : "text-[11px] opacity-60"}>
                     {active ? "attivo" : "usa"}
                   </span>
                 </div>
 
-                <div className="mt-1 text-xs text-white/60">{t.description}</div>
+                <div className="mt-1 text-xs opacity-70">{t.description}</div>
 
-                <div className="mt-3 h-8 w-full rounded-2xl border border-white/10"
+                <div
+                  className="mt-3 h-8 w-full rounded-2xl border border-white/10"
                   style={{
                     background: `radial-gradient(120px 60px at 25% 30%, ${t.accent}, transparent 65%), linear-gradient(180deg, ${t.bg0}, ${t.bg1})`,
                   }}
@@ -242,11 +251,11 @@ useEffect(() => {
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-semibold">{s.name}</div>
-                <span className={active ? "text-xs text-emerald-300/80" : "text-xs text-white/45"}>
+                <span className={active ? "text-xs text-emerald-400/80" : "text-xs opacity-60"}>
                   {active ? "attiva" : "seleziona"}
                 </span>
               </div>
-              <div className="mt-1 text-xs text-white/60">{s.vibe}</div>
+              <div className="mt-1 text-xs opacity-70">{s.vibe}</div>
             </button>
           );
         })}
@@ -256,8 +265,9 @@ useEffect(() => {
       <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm font-semibold">Volume</div>
-          <div className="text-xs text-white/60">{Math.round(volume * 100)}%</div>
+          <div className="text-xs opacity-70">{Math.round(volume * 100)}%</div>
         </div>
+
         <div className="mt-3">
           <input
             className="w-full accent-white"
@@ -268,8 +278,8 @@ useEffect(() => {
             value={volume}
             onChange={(e) => setVolume(Number(e.target.value))}
           />
-          <div className="mt-2 text-xs text-white/55">
-            Mobile: tap → <span className="text-white/80">Abilita audio</span> → Play. Sempre.
+          <div className="mt-2 text-xs opacity-70">
+            Mobile: tap → <span className="font-semibold opacity-95">Abilita audio</span> → Play.
           </div>
         </div>
       </div>
