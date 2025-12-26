@@ -1,195 +1,241 @@
-// components/Gallery.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-type Tile = {
+type RemoteImg = {
   id: string;
   url: string;
-  label: string;
-  poem: string;
+  alt: string;
+  credit?: string;
 };
-
-const QUERIES = [
-  "forest, mist",
-  "ocean, calm",
-  "rain, window",
-  "mountains, sunrise",
-  "night, stars",
-  "candle, cozy",
-  "zen, minimal",
-  "lake, fog",
-];
 
 const POEMS = [
   "Un dettaglio nuovo. Un respiro più lungo.",
-  "Qui non devi dimostrare niente.",
-  "Sposta l’attenzione: da rumore a ritmo.",
-  "Non serve correre: basta esserci.",
-  "Oggi scegli morbido.",
-  "Lascia andare il peso, tieni il calore.",
+  "La mente si siede. Il rumore si spegne.",
+  "Poche cose, fatte bene. Niente caos.",
+  "Oggi scegli morbido. Domani scegli luce.",
+  "Una stanza dentro la stanza. Silenzio buono.",
+  "Non devi correre. Devi solo esserci.",
 ];
 
-function pick<T>(arr: T[]) {
-  return arr[Math.floor(Math.random() * arr.length)];
+function pickN<T>(arr: T[], n: number) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, n);
 }
 
 /**
- * Unsplash random without API key:
- * https://source.unsplash.com/<w>x<h>/?<keywords>&sig=<n>
- * - `sig` changes the image (cache-buster)
+ * Immagini relax da Picsum (semplici e stabili).
+ * Usiamo seed + cache-bust così cambiano davvero a ogni refresh.
  */
-function unsplashUrl(query: string, sig: number, w = 1600, h = 1000) {
-  const q = encodeURIComponent(query);
-  return `https://source.unsplash.com/${w}x${h}/?${q}&sig=${sig}`;
+function buildPicsum(seed: number): RemoteImg {
+  // 1200x900 ottimo per card e lightbox
+  const url = `https://picsum.photos/seed/relax-${seed}/1200/900`;
+  return {
+    id: String(seed),
+    url,
+    alt: "Relax visual",
+    credit: "picsum.photos",
+  };
 }
 
 export default function Gallery() {
-  const [seed, setSeed] = useState(() => Date.now());
-  const [open, setOpen] = useState<number | null>(null);
+  const [nonce, setNonce] = useState(1); // per refresh “vero”
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [fadeKey, setFadeKey] = useState(0);
 
-  const tiles: Tile[] = useMemo(() => {
-    const poem = pick(POEMS);
-    return Array.from({ length: 6 }).map((_, i) => {
-      const query = pick(QUERIES);
-      return {
-        id: `${seed}-${i}`,
-        url: unsplashUrl(query, seed + i),
-        label: "Relax visual",
-        poem,
-      };
+  const poem = useMemo(() => {
+    // cambia poesia ad ogni refresh
+    return POEMS[(nonce - 1) % POEMS.length] ?? POEMS[0];
+  }, [nonce]);
+
+  const images = useMemo(() => {
+    // 12 seed random ad ogni refresh (stabili dentro quel refresh)
+    const seeds = Array.from({ length: 24 }, (_, i) => i + 1 + nonce * 1000);
+    const picked = pickN(seeds, 6).map(buildPicsum);
+
+    // cache-bust (sennò alcuni browser tengono in cache)
+    return picked.map((img) => ({
+      ...img,
+      url: `${img.url}?v=${nonce}`,
+    }));
+  }, [nonce]);
+
+  const open = useCallback((i: number) => {
+    setActiveIndex(i);
+  }, []);
+
+  const close = useCallback(() => {
+    setActiveIndex(null);
+  }, []);
+
+  const prev = useCallback(() => {
+    setActiveIndex((i) => {
+      if (i === null) return null;
+      return (i - 1 + images.length) % images.length;
     });
-  }, [seed]);
+  }, [images.length]);
 
-  const refresh = () => setSeed(Date.now());
+  const next = useCallback(() => {
+    setActiveIndex((i) => {
+      if (i === null) return null;
+      return (i + 1) % images.length;
+    });
+  }, [images.length]);
 
-  // lightbox controls
+  const refresh = useCallback(() => {
+    setFadeKey((k) => k + 1);
+    setNonce((n) => n + 1);
+  }, []);
+
   useEffect(() => {
-    if (open === null) return;
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null);
-      if (e.key === "ArrowRight") setOpen((v) => (v === null ? null : (v + 1) % tiles.length));
-      if (e.key === "ArrowLeft") setOpen((v) => (v === null ? null : (v - 1 + tiles.length) % tiles.length));
+    const onKey = (e: KeyboardEvent) => {
+      if (activeIndex === null) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
     };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeIndex, close, prev, next]);
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, tiles.length]);
+  const active = activeIndex === null ? null : images[activeIndex];
 
   return (
     <section className="rr-card p-5 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="text-2xl font-semibold tracking-tight">Gallery</div>
-          <div className="mt-1 text-sm text-white/65">Immagini che cambiano. Senza fretta.</div>
-          <div className="mt-2 text-xs text-white/50">{tiles[0]?.poem}</div>
+        <div className="space-y-2">
+          <div className="rr-badge">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400/80" />
+            <span>gallery • slow • soft</span>
+          </div>
+
+          <div className="text-xl sm:text-2xl font-semibold tracking-tight">
+            Gallery
+          </div>
+          <div className="text-sm text-white/70">
+            Immagini che cambiano. Senza fretta.
+          </div>
+          <div className="mt-2 text-xs text-white/55">{poem}</div>
         </div>
 
-        <button type="button" onClick={refresh} className="rr-btn rr-btn-primary self-start">
-          ✨ Rimescola atmosfera
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={refresh}
+            className="rr-btn rr-btn-primary"
+            aria-label="Rimescola atmosfera"
+          >
+            ✨ Rimescola atmosfera
+          </button>
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {tiles.map((t, idx) => (
+      {/* Grid */}
+      <div
+        key={fadeKey}
+        className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 animate-softFade"
+      >
+        {images.map((img, i) => (
           <button
-            key={t.id}
+            key={img.id}
             type="button"
-            onClick={() => setOpen(idx)}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 text-left"
-            style={{ aspectRatio: "4 / 3" }}
-            title="Apri"
+            onClick={() => open(i)}
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5"
           >
-            {/* immagine */}
-            <img
-              src={t.url}
-              alt={t.label}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500"
-              onLoad={(e) => {
-                (e.currentTarget as HTMLImageElement).style.opacity = "1";
-              }}
-              onError={(e) => {
-                const el = e.currentTarget as HTMLImageElement;
-                el.style.opacity = "0";
-              }}
-            />
-
-            {/* overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-85" />
-            <div className="absolute inset-0 ring-1 ring-white/0 transition group-hover:ring-white/15" />
-
-            <div className="absolute left-4 right-4 top-4 flex items-center justify-between gap-3">
-              <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs text-white/80 backdrop-blur">
-                🌿 {t.label}
-              </div>
-              <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur">
-                ↗ apri
-              </div>
+            <div className="relative aspect-[4/3] w-full">
+              <img
+                src={img.url}
+                alt={img.alt}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-70" />
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <div className="text-sm font-semibold text-white/90">Dettaglio</div>
-              <div className="mt-1 text-xs text-white/70">clicca per guardare meglio</div>
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="text-sm font-semibold text-white/90">
+                🌿 Relax visual
+              </div>
+              <div className="text-xs text-white/55">apri</div>
             </div>
           </button>
         ))}
       </div>
 
-      {/* LIGHTBOX */}
-      {open !== null && (
+      {/* Lightbox (VISIBILE, PROMESSO) */}
+      {active && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
-          onMouseDown={() => setOpen(null)}
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onMouseDown={(e) => {
+            // click fuori chiude
+            if (e.target === e.currentTarget) close();
+          }}
         >
-          <div
-            className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black/40 backdrop-blur"
-            onMouseDown={(e) => e.stopPropagation()}
+          <button
+            type="button"
+            onClick={close}
+            className="rr-btn absolute right-6 top-6 z-20"
           >
-            <div className="flex items-center justify-between gap-2 p-3">
-              <div className="text-xs text-white/70">
-                ← → per navigare • ESC per chiudere
-              </div>
-              <button type="button" className="rr-btn" onClick={() => setOpen(null)}>
-                ✕ Chiudi
-              </button>
-            </div>
+            ✕ Chiudi
+          </button>
 
-            <div className="relative" style={{ aspectRatio: "16 / 10" }}>
-              <img
-                src={tiles[open].url}
-                alt="Relax visual"
-                referrerPolicy="no-referrer"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="text-sm font-semibold text-white/90">Respira</div>
-                <div className="mt-1 text-xs text-white/75">{tiles[open].poem}</div>
-              </div>
-            </div>
+          <div className="absolute left-6 top-6 z-20 text-xs text-white/60">
+            ← → per navigare • ESC per chiudere
+          </div>
 
-            <div className="flex items-center justify-between gap-2 p-3">
-              <button
-                type="button"
-                className="rr-btn"
-                onClick={() => setOpen((v) => (v === null ? null : (v - 1 + tiles.length) % tiles.length))}
-              >
-                ← Prima
-              </button>
-              <button
-                type="button"
-                className="rr-btn rr-btn-primary"
-                onClick={() => setOpen((v) => (v === null ? null : (v + 1) % tiles.length))}
-              >
-                Dopo →
-              </button>
+          <button
+            type="button"
+            onClick={prev}
+            className="rr-btn absolute left-6 top-1/2 -translate-y-1/2 z-20"
+            aria-label="Immagine precedente"
+          >
+            ←
+          </button>
+
+          <button
+            type="button"
+            onClick={next}
+            className="rr-btn absolute right-6 top-1/2 -translate-y-1/2 z-20"
+            aria-label="Immagine successiva"
+          >
+            →
+          </button>
+
+          <div className="relative z-10 max-h-[90vh] max-w-[92vw]">
+            <img
+              src={active.url}
+              alt={active.alt}
+              className="max-h-[90vh] max-w-[92vw] object-contain rounded-2xl shadow-2xl"
+            />
+            <div className="mt-3 text-center text-xs text-white/55">
+              fonte: {active.credit ?? "web"}
             </div>
           </div>
         </div>
       )}
+
+      {/* Animazione poetica */}
+      <style jsx>{`
+        @keyframes softFade {
+          from {
+            opacity: 0;
+            transform: translateY(6px) scale(0.985);
+            filter: blur(2px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+        .animate-softFade {
+          animation: softFade 0.55s ease;
+        }
+      `}</style>
     </section>
   );
 }
