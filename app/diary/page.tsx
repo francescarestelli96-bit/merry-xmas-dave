@@ -1,5 +1,6 @@
 // app/diary/page.tsx
-import DiaryPanel from "@/components/DiaryPanel";
+import DiaryPanel from "../../components/DiaryPanel";
+
 
 export default function DiaryPage() {
   return (
