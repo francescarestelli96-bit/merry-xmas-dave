@@ -7,8 +7,8 @@ export type Theme = {
   description: string;
   bg0: string;
   bg1: string;
-  accent: string; // glow
-  text: string;   // ✅ testo per il tema (Alba = scuro)
+  accent: string; // usato come glow
+  text: string;   // ✅ colore testo globale per il tema
 };
 
 export const THEMES: Theme[] = [
@@ -16,42 +16,42 @@ export const THEMES: Theme[] = [
     id: "alba",
     name: "Alba",
     description: "chiaro, morbido, aria nuova",
-    bg0: "#f6f7fb",
-    bg1: "#e9ecf5",
-    accent: "rgba(255,183,77,0.35)",        // pesca/oro soft
-    text: "rgba(15,23,42,0.92)",            // slate-900 (leggibile su chiaro)
+    bg0: "#f8fafc",               // slate-50-ish
+    bg1: "#e2e8f0",               // slate-200-ish
+    accent: "rgba(56,189,248,0.35)", // cyan glow soft
+    text: "rgba(2,6,23,0.90)",    // ✅ testo scuro automatico
   },
   {
     id: "bosco",
     name: "Bosco",
-    description: "verde scuro, respiro profondo",
-    bg0: "#040a08",
-    bg1: "#071814",
-    accent: "rgba(52,211,153,0.18)",
+    description: "verde profondo, calma umida",
+    bg0: "#071a14",
+    bg1: "#04140f",
+    accent: "rgba(16,185,129,0.20)",
     text: "rgba(255,255,255,0.92)",
   },
   {
     id: "notte",
     name: "Notte",
-    description: "blu profondo, mente quieta",
-    bg0: "#050616",
-    bg1: "#0a0f26",
-    accent: "rgba(99,102,241,0.20)",
+    description: "dark dreamy, focus",
+    bg0: "#050615",
+    bg1: "#070b18",
+    accent: "rgba(99,102,241,0.25)",
     text: "rgba(255,255,255,0.92)",
   },
   {
     id: "zodiaco",
-    name: "Zodiaco · Cancro",
-    description: "blu cosmico, stelle protettive",
-    bg0: "#020617",
-    bg1: "#050b2e",
-    accent: "rgba(56,189,248,0.25)",        // azzurro stellare
-    text: "rgba(226,232,240,0.95)",         // slate-200 (soft su blu scuro)
+    name: "Zodiaco",
+    description: "blu notte, stelle e costellazioni",
+    bg0: "#020617",               // slate-950
+    bg1: "#020b2a",               // deep blue
+    accent: "rgba(56,189,248,0.18)", // icy starlight
+    text: "rgba(255,255,255,0.92)",
   },
 ];
 
 export const DEFAULT_THEME: ThemeId = "notte";
 
-export function getTheme(id?: string | null): Theme {
-  return THEMES.find((t) => t.id === id) ?? THEMES.find((t) => t.id === DEFAULT_THEME)!;
+export function getTheme(id: ThemeId) {
+  return THEMES.find((t) => t.id === id) ?? THEMES[0];
 }

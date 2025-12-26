@@ -2,29 +2,23 @@
 @import "tailwindcss";
 
 :root{
-  color-scheme: dark;
   --bg0:#060712;
   --bg1:#090f1d;
   --accent: rgba(99,102,241,0.22);
   --text: rgba(255,255,255,0.92);
+
+  /* UI tokens (derivati / override per theme) */
+  --surface: rgba(255,255,255,0.06);
+  --surface2: rgba(255,255,255,0.08);
   --ring: rgba(255,255,255,0.12);
   --ring2: rgba(255,255,255,0.16);
-}
+  --shadow: 0 24px 90px rgba(0,0,0,0.45);
 
-/* Theme overrides: ALBA */
-html[data-theme="alba"]{
-  color-scheme: light;
-  --ring: rgba(15,23,42,0.16);
-  --ring2: rgba(15,23,42,0.22);
-}
-
-/* Theme overrides: ZODIACO (leggero tweak) */
-html[data-theme="zodiaco"]{
   color-scheme: dark;
 }
 
-*{box-sizing:border-box;}
 html,body{height:100%;}
+*{box-sizing:border-box;}
 
 body{
   margin:0;
@@ -40,31 +34,37 @@ body{
 
 a{color:inherit;text-decoration:none;}
 
-/* ✅ IMPORTANT: non coprire stelle */
+/* background overlay (deve stare sotto stelle) */
 .app-bg{
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:-2;
+  z-index:-3;
   background:
     radial-gradient(700px 420px at 50% 0%, rgba(255,255,255,0.06), transparent 60%),
     radial-gradient(520px 340px at 82% 92%, rgba(255,255,255,0.04), transparent 60%);
 }
 
-/* --- SYSTEM UI (no tailwind apply) --- */
+/* ---------- THEME: ALBA (automatico) ---------- */
+html[data-theme="alba"]{
+  color-scheme: light;
+
+  /* superficie chiara, ring scuro, testo già settato da --text */
+  --surface: rgba(255,255,255,0.78);
+  --surface2: rgba(255,255,255,0.88);
+  --ring: rgba(2,6,23,0.16);
+  --ring2: rgba(2,6,23,0.24);
+  --shadow: 0 28px 80px rgba(2,6,23,0.14);
+}
+
+/* ---------- SYSTEM UI (no @apply) ---------- */
 .rr-card{
-  background: rgba(255,255,255,0.06);
+  background: var(--surface);
   border: 1px solid var(--ring);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-radius: 28px;
-  box-shadow: 0 24px 90px rgba(0,0,0,0.45);
-}
-
-/* Alba: card più latteo + ombra più soft */
-html[data-theme="alba"] .rr-card{
-  background: rgba(255,255,255,0.78);
-  box-shadow: 0 28px 80px rgba(2,6,23,0.14);
+  box-shadow: var(--shadow);
 }
 
 .rr-badge{
@@ -79,6 +79,8 @@ html[data-theme="alba"] .rr-card{
   font-size: 12px;
   line-height: 1;
 }
+
+/* Alba: badge più “ink” */
 html[data-theme="alba"] .rr-badge{
   background: rgba(2,6,23,0.06);
 }
@@ -92,15 +94,19 @@ html[data-theme="alba"] .rr-badge{
   border-radius: 18px;
   border: 1px solid var(--ring);
   background: rgba(255,255,255,0.06);
-  color: var(--text); /* ✅ era bianco hardcoded */
+  color: var(--text); /* ✅ automatico: in Alba è scuro */
   font-weight: 650;
   font-size: 14px;
   transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
   user-select:none;
 }
-.rr-btn:hover{ background: rgba(255,255,255,0.10); border-color: var(--ring2); }
+
+.rr-btn:hover{
+  background: rgba(255,255,255,0.10);
+  border-color: var(--ring2);
+}
 .rr-btn:active{ transform: translateY(1px) scale(0.99); }
-.rr-btn:focus{ outline:none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent); }
+.rr-btn:focus{ outline:none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent); }
 
 html[data-theme="alba"] .rr-btn{
   background: rgba(2,6,23,0.06);
@@ -111,12 +117,18 @@ html[data-theme="alba"] .rr-btn:hover{
 
 .rr-btn-primary{
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 55%, transparent), rgba(255,255,255,0.08));
-  box-shadow: 0 18px 60px color-mix(in srgb, var(--accent) 35%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    rgba(255,255,255,0.08)
+  );
+  box-shadow: 0 18px 60px color-mix(in srgb, var(--accent) 28%, transparent);
 }
 .rr-btn-primary:hover{
-  border-color: color-mix(in srgb, var(--accent) 75%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 70%, transparent), rgba(255,255,255,0.10));
+  border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 75%, transparent),
+    rgba(255,255,255,0.10)
+  );
 }
 
 .rr-btn[disabled]{
@@ -125,35 +137,59 @@ html[data-theme="alba"] .rr-btn:hover{
   transform:none;
 }
 
-/* --- ZODIACO / COSTELLAZIONE CANCRO --- */
-/* ✅ z-index sopra app-bg (-2) ma sotto contenuto */
-html[data-theme="zodiaco"] body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
+/* ---------- THEME: ZODIACO (blu notte + stelle vere) ---------- */
 
+/* stelle diffuse (molte, con glow) */
+html[data-theme="zodiaco"] body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-2;
+
+  /* layer 1: micro stelle */
   background:
-    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.85), transparent 60%),
-    radial-gradient(1px 1px at 40% 20%, rgba(255,255,255,0.75), transparent 60%),
-    radial-gradient(1px 1px at 60% 35%, rgba(255,255,255,0.65), transparent 60%),
-    radial-gradient(1px 1px at 70% 55%, rgba(255,255,255,0.75), transparent 60%),
-    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.65), transparent 60%),
-    radial-gradient(1px 1px at 55% 75%, rgba(255,255,255,0.55), transparent 60%);
-  opacity: 0.7;
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.85), transparent 60%),
+    radial-gradient(1px 1px at 22% 66%, rgba(255,255,255,0.70), transparent 60%),
+    radial-gradient(1px 1px at 35% 25%, rgba(255,255,255,0.75), transparent 60%),
+    radial-gradient(1px 1px at 48% 58%, rgba(255,255,255,0.65), transparent 60%),
+    radial-gradient(1px 1px at 63% 22%, rgba(255,255,255,0.80), transparent 60%),
+    radial-gradient(1px 1px at 74% 74%, rgba(255,255,255,0.60), transparent 60%),
+    radial-gradient(1px 1px at 86% 28%, rgba(255,255,255,0.78), transparent 60%),
+    radial-gradient(1px 1px at 91% 61%, rgba(255,255,255,0.62), transparent 60%),
+
+    /* layer 2: stelle più grandi con glow */
+    radial-gradient(2px 2px at 18% 42%, rgba(147,197,253,0.65), transparent 70%),
+    radial-gradient(2px 2px at 52% 18%, rgba(191,219,254,0.60), transparent 70%),
+    radial-gradient(2px 2px at 78% 40%, rgba(147,197,253,0.55), transparent 70%),
+    radial-gradient(2px 2px at 66% 82%, rgba(191,219,254,0.45), transparent 70%);
+
+  opacity:0.85;
+  filter: drop-shadow(0 0 6px rgba(147,197,253,0.20));
 }
 
-html[data-theme="zodiaco"] body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
+/* costellazione Cancro: punti + linee, posizionata top-right */
+html[data-theme="zodiaco"] body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-2;
 
+  /* Costellazione (stilizzata, ma “vera” come pattern): */
   background:
-    linear-gradient(120deg, transparent 48%, rgba(147,197,253,0.28) 49%, rgba(147,197,253,0.28) 51%, transparent 52%),
-    linear-gradient(40deg, transparent 47%, rgba(147,197,253,0.26) 48%, rgba(147,197,253,0.26) 50%, transparent 51%),
-    linear-gradient(300deg, transparent 46%, rgba(147,197,253,0.22) 47%, rgba(147,197,253,0.22) 49%, transparent 50%);
-  opacity: 0.28;
+    /* stelle (punti) */
+    radial-gradient(4px 4px at 78% 20%, rgba(255,255,255,0.95), transparent 65%),
+    radial-gradient(3px 3px at 84% 26%, rgba(255,255,255,0.88), transparent 65%),
+    radial-gradient(3px 3px at 74% 30%, rgba(255,255,255,0.85), transparent 65%),
+    radial-gradient(3px 3px at 86% 34%, rgba(255,255,255,0.80), transparent 65%),
+    radial-gradient(4px 4px at 80% 40%, rgba(255,255,255,0.92), transparent 65%),
+
+    /* linee sottili tra le stelle */
+    linear-gradient(35deg, transparent 49.4%, rgba(147,197,253,0.32) 49.6%, rgba(147,197,253,0.32) 50.4%, transparent 50.6%),
+    linear-gradient(115deg, transparent 49.4%, rgba(147,197,253,0.28) 49.6%, rgba(147,197,253,0.28) 50.4%, transparent 50.6%),
+    linear-gradient(155deg, transparent 49.4%, rgba(147,197,253,0.26) 49.6%, rgba(147,197,253,0.26) 50.4%, transparent 50.6%);
+
+  opacity:0.55;
+  filter: drop-shadow(0 0 10px rgba(56,189,248,0.18));
 }
