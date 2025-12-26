@@ -1,4 +1,3 @@
-// components/SoundMixer.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -30,7 +29,7 @@ export default function SoundMixer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const scene = useMemo(() => SCENES.find((s) => s.id === sceneId) ?? SCENES[0], [sceneId]);
-  const theme = useMemo(() => getTheme(themeId), [themeId]);
+  const theme = useMemo(() => getTheme(themeId) as Theme, [themeId]);
 
   // restore theme
   useEffect(() => {
@@ -40,16 +39,15 @@ export default function SoundMixer() {
     } catch {}
   }, []);
 
-  // apply theme vars (bg + accent + TEXT!) + data-theme for zodiaco overlays
+  // apply theme vars (bg + accent + text) + data-theme
   useEffect(() => {
     const root = document.documentElement;
-  const t = theme as Theme; // ora ha .text tipizzato
-root.style.setProperty("--bg0", t.bg0);
-root.style.setProperty("--bg1", t.bg1);
-root.style.setProperty("--accent", t.accent);
-root.style.setProperty("--text", t.text);
-root.setAttribute("data-theme", t.id);
 
+    root.style.setProperty("--bg0", theme.bg0);
+    root.style.setProperty("--bg1", theme.bg1);
+    root.style.setProperty("--accent", theme.accent);
+    root.style.setProperty("--text", theme.text);
+    root.setAttribute("data-theme", theme.id);
 
     try {
       localStorage.setItem("rr_theme_v1", theme.id);
@@ -159,11 +157,7 @@ root.setAttribute("data-theme", t.id);
             <span>sound • themes • chill</span>
           </div>
 
-          <div className="text-xl sm:text-2xl font-semibold tracking-tight">
-            {scene.name}
-          </div>
-
-          {/* niente text-white hardcoded: così Alba è leggibile */}
+          <div className="text-xl sm:text-2xl font-semibold tracking-tight">{scene.name}</div>
           <div className="text-sm opacity-75">{scene.vibe}</div>
         </div>
 
@@ -195,7 +189,6 @@ root.setAttribute("data-theme", t.id);
             <div className="text-sm font-semibold">Theme</div>
             <div className="mt-1 text-xs opacity-70">{theme.description}</div>
           </div>
-
           <div className="text-xs opacity-70">
             attivo: <span className="font-semibold opacity-95">{theme.name}</span>
           </div>
