@@ -12,9 +12,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="it" suppressHydrationWarning>
-      <body>
-        <div className="app-bg" aria-hidden="true" />
-        <div className="relative min-h-dvh">
+      <body className="min-h-dvh">
+        {/* Background overlay MUST NOT capture clicks */}
+        <div className="app-bg pointer-events-none" aria-hidden="true" />
+
+        {/* App content sits above */}
+        <div className="relative z-10 min-h-dvh">
           <Navbar />
           <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6">
             {children}
