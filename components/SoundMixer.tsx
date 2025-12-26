@@ -41,15 +41,18 @@ export default function SoundMixer() {
   }, []);
 
   // apply theme vars
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty("--bg0", theme.bg0);
-    root.style.setProperty("--bg1", theme.bg1);
-    root.style.setProperty("--accent", theme.accent);
-    try {
-      localStorage.setItem("rr_theme_v1", theme.id);
-    } catch {}
-  }, [theme]);
+useEffect(() => {
+  const root = document.documentElement;
+  root.style.setProperty("--bg0", theme.bg0);
+  root.style.setProperty("--bg1", theme.bg1);
+  root.style.setProperty("--accent", theme.accent);
+  root.setAttribute("data-theme", theme.id);
+
+  try {
+    localStorage.setItem("rr_theme_v1", theme.id);
+  } catch {}
+}, [theme]);
+
 
   // init audio
   useEffect(() => {

@@ -7,17 +7,18 @@ export type Theme = {
   description: string;
   bg0: string;
   bg1: string;
-  accent: string; // glow
+  accent: string;
+  stars?: boolean; // solo per zodiaco
 };
 
 export const THEMES: Theme[] = [
   {
     id: "alba",
     name: "Alba",
-    description: "luce morbida, ripartenza gentile",
-    bg0: "#070514",
-    bg1: "#0b1630",
-    accent: "rgba(253,164,175,0.22)",
+    description: "chiaro, morbido, aria nuova",
+    bg0: "#f6f7fb",
+    bg1: "#e9ecf5",
+    accent: "rgba(255,183,77,0.35)", // pesca/oro soft
   },
   {
     id: "bosco",
@@ -37,11 +38,12 @@ export const THEMES: Theme[] = [
   },
   {
     id: "zodiaco",
-    name: "Zodiaco",
-    description: "cosmico, viola, stellare",
-    bg0: "#070515",
-    bg1: "#140a25",
-    accent: "rgba(167,139,250,0.22)",
+    name: "Zodiaco · Cancro",
+    description: "blu cosmico, stelle protettive",
+    bg0: "#020617",
+    bg1: "#050b2e",
+    accent: "rgba(56,189,248,0.25)", // azzurro stellare
+    stars: true,
   },
 ];
 
