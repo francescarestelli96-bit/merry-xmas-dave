@@ -7,7 +7,6 @@
   --accent: rgba(99,102,241,0.22);
   --text: rgba(255,255,255,0.92);
 
-  /* UI tokens (derivati / override per theme) */
   --surface: rgba(255,255,255,0.06);
   --surface2: rgba(255,255,255,0.08);
   --ring: rgba(255,255,255,0.12);
@@ -34,7 +33,7 @@ body{
 
 a{color:inherit;text-decoration:none;}
 
-/* background overlay (deve stare sotto stelle) */
+/* sotto a tutto */
 .app-bg{
   position:fixed;
   inset:0;
@@ -45,16 +44,53 @@ a{color:inherit;text-decoration:none;}
     radial-gradient(520px 340px at 82% 92%, rgba(255,255,255,0.04), transparent 60%);
 }
 
-/* ---------- THEME: ALBA (automatico) ---------- */
+/* ---------- THEME: ALBA (leggibile SEMPRE) ---------- */
 html[data-theme="alba"]{
   color-scheme: light;
 
-  /* superficie chiara, ring scuro, testo già settato da --text */
+  --bg0:#fbfdff;
+  --bg1:#e8eef7;
+  --accent: rgba(56,189,248,0.30);
+  --text: rgba(2,6,23,0.90);
+
   --surface: rgba(255,255,255,0.78);
   --surface2: rgba(255,255,255,0.88);
   --ring: rgba(2,6,23,0.16);
   --ring2: rgba(2,6,23,0.24);
   --shadow: 0 28px 80px rgba(2,6,23,0.14);
+}
+
+/* background “alba” più contrastato (niente washout totale) */
+html[data-theme="alba"] body{
+  background:
+    radial-gradient(900px 520px at 15% 0%, rgba(251,191,36,0.22), transparent 60%),
+    radial-gradient(900px 520px at 85% 10%, rgba(56,189,248,0.22), transparent 60%),
+    radial-gradient(900px 600px at 50% 95%, rgba(244,114,182,0.16), transparent 62%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  color: var(--text);
+}
+
+/* overlay più delicato in alba */
+html[data-theme="alba"] .app-bg{
+  background:
+    radial-gradient(700px 420px at 50% 0%, rgba(2,6,23,0.06), transparent 60%),
+    radial-gradient(520px 340px at 82% 92%, rgba(2,6,23,0.04), transparent 60%);
+  opacity: .55;
+}
+
+/* ✅ OVERRIDE HARD: qualsiasi tailwind "text-white..." diventa scuro in Alba */
+html[data-theme="alba"] [class*="text-white"]{
+  color: var(--text) !important;
+}
+html[data-theme="alba"] [class*="placeholder:text-white"]::placeholder{
+  color: rgba(2,6,23,0.45) !important;
+}
+/* opzionale ma utile: bordi "border-white/.." non spariscono */
+html[data-theme="alba"] [class*="border-white"]{
+  border-color: var(--ring) !important;
+}
+html[data-theme="alba"] [class*="ring-white"]{
+  --tw-ring-color: var(--ring) !important;
 }
 
 /* ---------- SYSTEM UI (no @apply) ---------- */
@@ -80,7 +116,6 @@ html[data-theme="alba"]{
   line-height: 1;
 }
 
-/* Alba: badge più “ink” */
 html[data-theme="alba"] .rr-badge{
   background: rgba(2,6,23,0.06);
 }
@@ -94,26 +129,19 @@ html[data-theme="alba"] .rr-badge{
   border-radius: 18px;
   border: 1px solid var(--ring);
   background: rgba(255,255,255,0.06);
-  color: var(--text); /* ✅ automatico: in Alba è scuro */
+  color: var(--text);
   font-weight: 650;
   font-size: 14px;
   transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
   user-select:none;
 }
 
-.rr-btn:hover{
-  background: rgba(255,255,255,0.10);
-  border-color: var(--ring2);
-}
+.rr-btn:hover{ background: rgba(255,255,255,0.10); border-color: var(--ring2); }
 .rr-btn:active{ transform: translateY(1px) scale(0.99); }
 .rr-btn:focus{ outline:none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent); }
 
-html[data-theme="alba"] .rr-btn{
-  background: rgba(2,6,23,0.06);
-}
-html[data-theme="alba"] .rr-btn:hover{
-  background: rgba(2,6,23,0.10);
-}
+html[data-theme="alba"] .rr-btn{ background: rgba(2,6,23,0.06); }
+html[data-theme="alba"] .rr-btn:hover{ background: rgba(2,6,23,0.10); }
 
 .rr-btn-primary{
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
@@ -131,23 +159,24 @@ html[data-theme="alba"] .rr-btn:hover{
   );
 }
 
-.rr-btn[disabled]{
-  opacity:.45;
-  cursor:not-allowed;
-  transform:none;
+.rr-btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
+
+/* ---------- THEME: ZODIACO (blu notte + stelle) ---------- */
+html[data-theme="zodiaco"] body{
+  background:
+    radial-gradient(1100px 700px at 15% 10%, rgba(56,189,248,0.14), transparent 60%),
+    radial-gradient(900px 650px at 90% 20%, rgba(99,102,241,0.18), transparent 60%),
+    radial-gradient(900px 700px at 40% 95%, rgba(236,72,153,0.10), transparent 62%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
 }
 
-/* ---------- THEME: ZODIACO (blu notte + stelle vere) ---------- */
-
-/* stelle diffuse (molte, con glow) */
+/* stelle diffuse */
 html[data-theme="zodiaco"] body::before{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
   z-index:-2;
-
-  /* layer 1: micro stelle */
   background:
     radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.85), transparent 60%),
     radial-gradient(1px 1px at 22% 66%, rgba(255,255,255,0.70), transparent 60%),
@@ -157,39 +186,31 @@ html[data-theme="zodiaco"] body::before{
     radial-gradient(1px 1px at 74% 74%, rgba(255,255,255,0.60), transparent 60%),
     radial-gradient(1px 1px at 86% 28%, rgba(255,255,255,0.78), transparent 60%),
     radial-gradient(1px 1px at 91% 61%, rgba(255,255,255,0.62), transparent 60%),
-
-    /* layer 2: stelle più grandi con glow */
     radial-gradient(2px 2px at 18% 42%, rgba(147,197,253,0.65), transparent 70%),
     radial-gradient(2px 2px at 52% 18%, rgba(191,219,254,0.60), transparent 70%),
     radial-gradient(2px 2px at 78% 40%, rgba(147,197,253,0.55), transparent 70%),
     radial-gradient(2px 2px at 66% 82%, rgba(191,219,254,0.45), transparent 70%);
-
   opacity:0.85;
   filter: drop-shadow(0 0 6px rgba(147,197,253,0.20));
 }
 
-/* costellazione Cancro: punti + linee, posizionata top-right */
+/* “Cancro” stilizzato top-right: punti + linee */
 html[data-theme="zodiaco"] body::after{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
   z-index:-2;
-
-  /* Costellazione (stilizzata, ma “vera” come pattern): */
   background:
-    /* stelle (punti) */
     radial-gradient(4px 4px at 78% 20%, rgba(255,255,255,0.95), transparent 65%),
     radial-gradient(3px 3px at 84% 26%, rgba(255,255,255,0.88), transparent 65%),
     radial-gradient(3px 3px at 74% 30%, rgba(255,255,255,0.85), transparent 65%),
     radial-gradient(3px 3px at 86% 34%, rgba(255,255,255,0.80), transparent 65%),
     radial-gradient(4px 4px at 80% 40%, rgba(255,255,255,0.92), transparent 65%),
 
-    /* linee sottili tra le stelle */
     linear-gradient(35deg, transparent 49.4%, rgba(147,197,253,0.32) 49.6%, rgba(147,197,253,0.32) 50.4%, transparent 50.6%),
     linear-gradient(115deg, transparent 49.4%, rgba(147,197,253,0.28) 49.6%, rgba(147,197,253,0.28) 50.4%, transparent 50.6%),
     linear-gradient(155deg, transparent 49.4%, rgba(147,197,253,0.26) 49.6%, rgba(147,197,253,0.26) 50.4%, transparent 50.6%);
-
   opacity:0.55;
   filter: drop-shadow(0 0 10px rgba(56,189,248,0.18));
 }
