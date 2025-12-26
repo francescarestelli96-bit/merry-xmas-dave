@@ -1,0 +1,53 @@
+
+// app/api/img/route.ts
+import type { NextRequest } from "next/server";
+
+export const runtime = "nodejs"; // ok su Vercel
+
+const ALLOWED_HOSTS = new Set([
+  "source.unsplash.com",
+  "images.unsplash.com",
+  "unsplash.com",
+]);
+
+export async function GET(req: NextRequest) {
+  const src = req.nextUrl.searchParams.get("src");
+  if (!src) return new Response("Missing src", { status: 400 });
+
+  let url: URL;
+  try {
+    url = new URL(src);
+  } catch {
+    return new Response("Bad src", { status: 400 });
+  }
+
+  if (url.protocol !== "https:" || !ALLOWED_HOSTS.has(url.hostname)) {
+    return new Response("Blocked host", { status: 403 });
+  }
+
+  // fetch con redirect (Unsplash Source risponde spesso 302)
+  const r = await fetch(url.toString(), {
+    redirect: "follow",
+    headers: {
+      // aiuta quando qualcuno ha referrer policy aggressiva
+      "User-Agent": "RelaxRoomImageProxy",
+      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    },
+  });
+
+  if (!r.ok) return new Response("Upstream failed", { status: 502 });
+
+  const contentType = r.headers.get("content-type") ?? "image/jpeg";
+  const data = await r.arrayBuffer();
+
+  return new Response(data, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      // caching sano su Vercel CDN
+      "Cache-Control":
+        "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+    },
+  });
+}
+

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 const IMAGE_COUNT = 6;
 
-// parole chiave poetiche (Unsplash le usa per randomizzare)
 const KEYWORDS = [
   "calm nature",
   "mist forest",
@@ -17,33 +16,30 @@ const KEYWORDS = [
   "quiet minimal",
 ];
 
-function randomKeyword() {
-  return KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
+function pick(arr: string[]) {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function buildImageUrl(seed: number) {
-  const keyword = randomKeyword();
-  // 800x600 = buon compromesso qualità/performance
-  return `https://source.unsplash.com/800x600/?${encodeURIComponent(
-    keyword
-  )}&sig=${seed}`;
+function upstreamUrl(seed: number) {
+  // Unsplash Source = random by query + sig
+  const q = pick(KEYWORDS);
+  return `https://source.unsplash.com/1200x900/?${encodeURIComponent(q)}&sig=${seed}`;
+}
+
+function proxied(src: string) {
+  return `/api/img?src=${encodeURIComponent(src)}`;
 }
 
 export default function Gallery() {
-  const [seed, setSeed] = useState(0);
   const [images, setImages] = useState<string[]>([]);
 
   const reshuffle = () => {
-    const nextSeed = Date.now();
-    setSeed(nextSeed);
+    const base = Date.now();
     setImages(
-      Array.from({ length: IMAGE_COUNT }, (_, i) =>
-        buildImageUrl(nextSeed + i)
-      )
+      Array.from({ length: IMAGE_COUNT }, (_, i) => proxied(upstreamUrl(base + i)))
     );
   };
 
-  // prima render
   useEffect(() => {
     reshuffle();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,7 +66,7 @@ export default function Gallery() {
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {images.map((src, i) => (
+        {images.map((src) => (
           <div
             key={src}
             className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 bg-white/5"
@@ -86,13 +82,12 @@ export default function Gallery() {
         ))}
       </div>
 
-      {/* animazione poetica */}
       <style jsx>{`
         @keyframes softFade {
           from {
             opacity: 0;
             filter: blur(6px);
-            transform: scale(0.98);
+            transform: scale(0.985);
           }
           to {
             opacity: 1;
